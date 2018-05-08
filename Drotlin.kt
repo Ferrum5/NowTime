@@ -56,14 +56,12 @@ fun FragmentV4.alert(message: String) {
     activity?.alert(message)
 }
 
-
-fun <T : Activity> Activity.startActivity(clazz: KClass<T>) {
-    startActivity(Intent(this, clazz.java))
-}
-
-inline fun <T : Activity> Activity.startActivity(clazz: KClass<T>, handler: Intent.() -> Unit) {
+inline fun <T : Activity> Context.startActivity(clazz: KClass<T>, handler: Intent.() -> Unit = {}) {
     val intent = Intent(this, clazz.java)
     handler(intent)
+    if (this !is Activity) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
     startActivity(intent)
 }
 
@@ -86,29 +84,22 @@ fun toast(message: String) {
 //Debug==================================================
 val isDebug: Boolean by lazy { drotlin.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 }
 
-fun Any?.log(message: String?, tag: Any? = this) {
+val <T: Any>T.LOG_TAG: String
+    get() = this.javaClass.simpleName
+
+fun Any?.log(message: String?, tag: String = this?.LOG_TAG ?: "!NULL_TAG!") {
     if (isDebug) {
-        val logTag: String = when (tag) {
-            is String -> tag
-            null -> "!null tag!"
-            else -> tag::class.java.simpleName
-        }
-        logI(logTag, message ?: "!null message!")
+        logReal(tag, message ?: "!null message!")
     }
 }
 
-fun Any?.log(map: Map<String, String>?, tag: Any? = this) {
+fun Any?.log(map: Map<String, String>?, tag: String = this?.LOG_TAG ?: "!NULL_TAG!") {
     if (isDebug) {
-        val logTag: String = when (tag) {
-            is String -> tag
-            null -> "!null tag!"
-            else -> tag::class.java.simpleName
-        }
-        logI(logTag, map?.toString() ?: "!null map!")
+        logReal(tag, map?.toString() ?: "!null map!")
     }
 }
 
-private fun logI(tag: String, msg: String) {
+private fun logReal(tag: String, msg: String) {
     Log.d(tag, msg)
 }
 
@@ -118,7 +109,7 @@ fun throwE(e: Exception) {
     }
 }
 
-fun logException(tag: String, message: String = "Catch Exception", e: Exception) {
+fun logException(e: Exception, tag: String = e.javaClass.simpleName, message: String = e.message?:e.javaClass.name) {
     if (isDebug) {
         Log.e(tag, message, e)
     }
