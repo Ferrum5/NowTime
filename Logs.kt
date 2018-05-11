@@ -1,12 +1,16 @@
 package drotlin
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.util.AndroidRuntimeException
 import android.util.Log
 
 
-//Debug==================================================
-val isDebug: Boolean = (drotlin.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+var isDebug: Boolean = false
+
+fun setDebugEnable(context: Context){
+    isDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+}
 
 val <T : Any>T.LOG_TAG: String
     get() = this.javaClass.simpleName

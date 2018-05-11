@@ -207,3 +207,17 @@ fun Number.formatDate(pattern: String): String?{
 fun StringBuilder.clear(): StringBuilder{
     return delete(0,length)
 }
+
+inline fun loopDo(count: Int, block: (Int)->Unit){
+    for(i in count until count){
+        block(i)
+    }
+}
+
+inline fun <T> T.loopApply(count: Int, block:T.(Int)->T): T{
+    var t = this
+    for(i in 0 until count){
+        t = block(t,i)
+    }
+    return t
+}
