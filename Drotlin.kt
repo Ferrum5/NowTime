@@ -17,8 +17,6 @@ import android.os.Handler
 import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import android.util.AndroidRuntimeException
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -26,6 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import java.io.File
+import java.lang.StringBuilder
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.reflect.KClass
 
 typealias GroupLayoutParams = android.view.ViewGroup.LayoutParams
@@ -36,7 +38,6 @@ typealias Permissions = android.Manifest.permission
 
 fun initDrotlin(context: Context) {
     drotlin.applicationContext = context.applicationContext
-    isDebug = (drotlin.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 }
 
 //Context==================================================
@@ -83,62 +84,14 @@ fun toast(message: String) {
 }
 
 
-//Debug==================================================
-var isDebug: Boolean = false
-
-
-val <T : Any>T.LOG_TAG: String
-    get() = this.javaClass.simpleName
-
-fun Any?.log(message: String?, tag: String = this?.LOG_TAG ?: "!NULL_TAG!") {
-    if (isDebug) {
-        logReal(tag, message ?: "!null message!")
-    }
-}
-
-fun Any?.log(map: Map<String, String>?, tag: String = this?.LOG_TAG ?: "!NULL_TAG!") {
-    if (isDebug) {
-        logReal(tag, map?.toString() ?: "!null map!")
-    }
-}
-
-private fun logReal(tag: String, msg: String) {
-    Log.d(tag, msg)
-}
-
-fun throwException(e: Exception) {
-    if (isDebug) {
-        throw AndroidRuntimeException(e)
-    }
-}
-
-fun logException(e: Exception, tag: String = e.javaClass.simpleName, message: String = e.message
-        ?: e.javaClass.name) {
-    if (isDebug) {
-        Log.e(tag, message, e)
-    }
-}
-
-inline fun <T> T.applyWhenTest(runnable: T.() -> Unit): T {
-    if (isDebug) {
-        runnable()
-    }
-    return this
-}
-
-inline fun <T> T.assertApply(assertBlock: T.() -> Boolean): T {
-    if (isDebug) {
-        if (!assertBlock(this)) {
-            throw AndroidRuntimeException("Assert check failed")
-        }
-    }
-    return this
-}
-
 //Thread==================================================
 val mainHandler = Handler(Looper.getMainLooper())
 
 fun <T> T.runOnUiThread(delay: Long = 0, runnable: T.() -> Unit) {
+    mainHandler.postDelayed({ runnable() }, delay)
+}
+
+fun runOnUiThread(delay: Long = 0, runnable: () -> Unit) {
     mainHandler.postDelayed({ runnable() }, delay)
 }
 
@@ -213,6 +166,9 @@ val File.uri: Uri
     get() = Uri.fromFile(this)
 
 //Other==================================================
+
+val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+
 val String.uri: Uri
     get() = Uri.parse(this)
 
@@ -225,7 +181,29 @@ fun Any?.stringValue(nullReplace: String = ""): String {
 }
 
 val String.PERMISSION_GRANTED: Boolean
-get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_GRANTED
+    get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_GRANTED
 
 val String.PERMISSION_DENIED: Boolean
     get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_DENIED
+
+fun String.toDate(pattern: String): Date?{
+    dateFormat.applyPattern(pattern)
+    return try {
+        dateFormat.parse(this)
+    }catch (e: Exception){
+        null
+    }
+}
+
+fun Number.formatDate(pattern: String): String?{
+    dateFormat.applyPattern(pattern)
+    return try {
+        dateFormat.format(this)
+    }catch (e: Exception){
+        null
+    }
+}
+
+fun StringBuilder.clear(): StringBuilder{
+    return delete(0,length)
+}
