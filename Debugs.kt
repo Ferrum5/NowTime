@@ -8,22 +8,16 @@ import android.util.Log
 
 var isDebug: Boolean = false
 
-fun setDebugEnable(context: Context){
+fun setDebugEnable(context: Context) {
     isDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 }
 
 val <T : Any>T.LOG_TAG: String
     get() = this.javaClass.simpleName
 
-fun log(tag: String, message: String?) {
+fun log(tag: String, message: Any?) {
     if (isDebug) {
-        logReal(tag, message ?: "!null message!")
-    }
-}
-
-fun log(tag: String, map: Map<String, Any?>) {
-    if (isDebug) {
-        logReal(tag, map.toString())
+        logReal(tag, message as? String ?: message?.toString() ?: "!null message!")
     }
 }
 
@@ -65,9 +59,7 @@ fun logT(tableName: String, map: Map<String, Any?>) {
 
     val sb = StringBuilder()
 
-    sb.append(tableName)
-            .append(" : ")
-            .append(System.currentTimeMillis().formatDate("HH:mm:ss:SSS"))
+    sb + tableName + " : " + System.currentTimeMillis().formatDate("HH:mm:ss:SSS")
     val rows = map.size
     val ks = arrayOfNulls<String>(rows)
     val vs = arrayOfNulls<String>(rows)
@@ -105,103 +97,81 @@ fun logT(tableName: String, map: Map<String, Any?>) {
     titleLength -= 2
 
     sb.clear()
-    sb.append("===\n===\n")
-    sb.append("┌")
+    sb + "==="
+    sb.nextLine()
+    sb + "==="
+    sb.nextLine()
 
-    for (i in 1..(totalLength - 2)) {
-        sb.append(line)
-    }
-
-    sb.append("┐")
-    sb.append("\n")
-    sb.append("│")
+    //表头上边
+    sb + "┌"
+    sb.appendMultiTimes(totalLength - 2,line)
+    sb + "┐"
+    sb.nextLine()
+    //表头
+    sb + "│"
     val spaceNum = totalLength - titleLength - 2
-
-    for (i in 1..spaceNum / 2) {
-        sb.append(" ")
-    }
-    sb.append(title)
-
+    sb.space(spaceNum / 2)
+    sb + title
     //奇数会错位
-    for (i in 1..spaceNum / 2 + (spaceNum and 1)) {
-        sb.append(" ")
-    }
-    sb.append("│")
-    sb.append("\n")
-
-    sb.append("├")
-    for (i in 1..maxKeyLength) {
-        sb.append(line)
-    }
-
-    sb.append("┬")
-    for (i in 1..maxClassLength) {
-        sb.append(line)
-    }
-
-    sb.append("┬")
-    for (i in 1..maxValueLength) {
-        sb.append(line)
-    }
-
-    sb.append("┤")
-    sb.append("\n")
+    sb.space(spaceNum / 2 + (spaceNum and 1))
+    sb + "│"
+    //表头下边
+    sb.nextLine()
+    sb + "├"
+    sb.appendMultiTimes(maxKeyLength,line)
+    sb + "┬"
+    sb.appendMultiTimes(maxClassLength,line)
+    sb + "┬"
+    sb.appendMultiTimes(maxValueLength,line)
+    sb + "┤"
+    sb.nextLine()
 
     for (i in 0 until rows) {
-        sb.append("│").append(keys[i])
-        for (j in 0 until maxKeyLength - keys[i].length) {
-            sb.append(" ")
-        }
+        sb + "│" + keys[i]
+        sb.space(maxKeyLength - keys[i].length)
 
-        sb.append("│").append(classs[i])
+        sb + "│" + classs[i]
+        sb.space(maxClassLength - classs[i].length)
 
-        for (j in 0 until maxClassLength - classs[i].length) {
-            sb.append(" ")
-        }
+        sb + "│" + values[i]
+        sb.space(maxValueLength - values[i].length)
 
-        sb.append("│").append(values[i])
-        for (j in 0 until maxValueLength - values[i].length) {
-            sb.append(" ")
-        }
-
-        sb.append("│").append("\n")
+        sb + "│"
+        sb.nextLine()
 
         val isLastLine = i == rows - 1
 
-
-        sb.append(if (isLastLine) {
+        sb + if (isLastLine) {
             "└"
         } else {
             "├"
-        })
-
-        for (j in 0 until maxKeyLength) {
-            sb.append(line)
         }
 
-        sb.append(if (isLastLine) {
+        sb.appendMultiTimes(maxKeyLength, line)
+
+
+        sb + if (isLastLine) {
             "┴"
         } else {
             "┼"
-        })
-        for (j in 0 until maxClassLength) {
-            sb.append(line)
         }
 
-        sb.append(if (isLastLine) {
+        sb.appendMultiTimes(maxClassLength, line)
+
+        sb + if (isLastLine) {
             "┴"
         } else {
             "┼"
-        })
-        for (j in 0 until maxValueLength) {
-            sb.append(line)
         }
-        sb.append(if (isLastLine) {
+        sb.appendMultiTimes(maxValueLength, line)
+
+
+        sb + if (isLastLine) {
             "┘"
         } else {
             "┤"
-        })
-        sb.append("\n")
+        }
+        sb.nextLine()
     }
     logReal(tableName, sb.toString())
 }

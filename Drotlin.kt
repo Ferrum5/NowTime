@@ -25,7 +25,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import java.io.File
 import java.lang.StringBuilder
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
@@ -165,9 +164,8 @@ fun String.toFile(): File {
 val File.uri: Uri
     get() = Uri.fromFile(this)
 
-//Other==================================================
-
-val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+//String==================================================
+val dateFormat by lazy { SimpleDateFormat("yyyy-MM-dd", Locale.CHINA) }
 
 val String.uri: Uri
     get() = Uri.parse(this)
@@ -186,38 +184,100 @@ val String.PERMISSION_GRANTED: Boolean
 val String.PERMISSION_DENIED: Boolean
     get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_DENIED
 
-fun String.toDate(pattern: String): Date?{
+fun String.toDate(pattern: String): Date? {
     dateFormat.applyPattern(pattern)
     return try {
         dateFormat.parse(this)
-    }catch (e: Exception){
+    } catch (e: Exception) {
         null
     }
 }
 
-fun Number.formatDate(pattern: String): String?{
+fun Number.formatDate(pattern: String): String? {
     dateFormat.applyPattern(pattern)
     return try {
         dateFormat.format(this)
-    }catch (e: Exception){
+    } catch (e: Exception) {
         null
     }
 }
 
-fun StringBuilder.clear(): StringBuilder{
-    return delete(0,length)
+fun StringBuilder.clear(): StringBuilder {
+    return delete(0, length)
 }
 
-inline fun loopDo(count: Int, block: (Int)->Unit){
-    for(i in count until count){
+operator fun StringBuilder.plus(s: String?): StringBuilder {
+    if(s!=null){
+        append(s)
+    }
+    return this
+}
+
+operator fun StringBuilder.minus(count: Int): StringBuilder {
+    if (count > length) {
+        delete(0, length)
+    } else {
+        delete(0, length - count)
+    }
+    return this
+}
+
+operator fun StringBuilder.times(time: Int): StringBuilder {
+    when{
+        time<=0 -> clear()
+        time==1 -> {}
+        time == 2 ->append(toString())
+        else -> {
+            val current = toString()
+            loopDo(time-1){append(current)}
+        }
+    }
+    return this
+}
+
+fun StringBuilder.nextLine(): StringBuilder {
+    append("\n")
+    return this
+}
+
+fun StringBuilder.tab(): StringBuilder{
+    space(4)
+    return this
+}
+
+fun StringBuilder.space(count: Int = 1): StringBuilder{
+    appendMultiTimes(count," ")
+    return this
+}
+
+fun StringBuilder.appendMultiTimes(time: Int, s: String): StringBuilder{
+    if(time==1){
+        append(s)
+    }else if(time>1){
+        loopDo(time){append(s)}
+    }
+    return this
+}
+
+//Other==================================================
+
+
+inline fun loopDo(count: Int, block: (Int) -> Unit) {
+    for (i in 0 until count) {
         block(i)
     }
 }
 
-inline fun <T> T.loopApply(count: Int, block:T.(Int)->T): T{
+inline fun <T> T.loopApply(count: Int, block: T.(Int) -> T): T {
     var t = this
-    for(i in 0 until count){
-        t = block(t,i)
+    for (i in 0 until count) {
+        t = block(t, i)
     }
     return t
+}
+
+
+fun test() {
+    var sb = StringBuilder()
+    sb += "5"
 }
