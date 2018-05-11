@@ -8,12 +8,14 @@ import android.support.v4.app.Fragment as FragmentV4
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.Looper
 import android.os.Handler
 import android.support.v4.app.FragmentActivity
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.AndroidRuntimeException
 import android.util.Log
@@ -26,15 +28,15 @@ import android.widget.Toast
 import java.io.File
 import kotlin.reflect.KClass
 
-
-const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
-const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
-const val EXACTLY = View.MeasureSpec.EXACTLY
-const val AT_MOST = View.MeasureSpec.AT_MOST
-const val UNSPECIFIED = View.MeasureSpec.UNSPECIFIED
+typealias GroupLayoutParams = android.view.ViewGroup.LayoutParams
+typealias MarginLayoutParams = android.view.ViewGroup.MarginLayoutParams
+typealias LinearLayoutParams = android.widget.LinearLayout.LayoutParams
+typealias FrameLayoutParams = android.widget.FrameLayout.LayoutParams
+typealias Permissions = android.Manifest.permission
 
 fun initDrotlin(context: Context) {
     drotlin.applicationContext = context.applicationContext
+    isDebug = (drotlin.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 }
 
 //Context==================================================
@@ -82,9 +84,10 @@ fun toast(message: String) {
 
 
 //Debug==================================================
-val isDebug: Boolean by lazy { drotlin.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 }
+var isDebug: Boolean = false
 
-val <T: Any>T.LOG_TAG: String
+
+val <T : Any>T.LOG_TAG: String
     get() = this.javaClass.simpleName
 
 fun Any?.log(message: String?, tag: String = this?.LOG_TAG ?: "!NULL_TAG!") {
@@ -103,13 +106,14 @@ private fun logReal(tag: String, msg: String) {
     Log.d(tag, msg)
 }
 
-fun throwE(e: Exception) {
+fun throwException(e: Exception) {
     if (isDebug) {
         throw AndroidRuntimeException(e)
     }
 }
 
-fun logException(e: Exception, tag: String = e.javaClass.simpleName, message: String = e.message?:e.javaClass.name) {
+fun logException(e: Exception, tag: String = e.javaClass.simpleName, message: String = e.message
+        ?: e.javaClass.name) {
     if (isDebug) {
         Log.e(tag, message, e)
     }
@@ -118,6 +122,15 @@ fun logException(e: Exception, tag: String = e.javaClass.simpleName, message: St
 inline fun <T> T.applyWhenTest(runnable: T.() -> Unit): T {
     if (isDebug) {
         runnable()
+    }
+    return this
+}
+
+inline fun <T> T.assertApply(assertBlock: T.() -> Boolean): T {
+    if (isDebug) {
+        if (!assertBlock(this)) {
+            throw AndroidRuntimeException("Assert check failed")
+        }
     }
     return this
 }
@@ -145,7 +158,7 @@ fun Context.inflate(layoutId: Int, viewGroup: ViewGroup? = null, attachToRoot: B
 val Int.dimensionPixelSize: Int
     get() = applicationContext.resources.getDimensionPixelSize(this)
 
-val Int.dip2Px: Int
+val Number.dip2Px: Int
     get() = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, toFloat(), applicationContext.resources.displayMetrics)
             .toInt()
@@ -189,9 +202,8 @@ val File?.exists: Boolean
 val File?.isDirectory: Boolean
     get() = this != null && this.exists() && this.isDirectory
 
-fun getPictureDir(): File {
-    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-}
+val pictureDir: File
+    get() = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
 
 fun String.toFile(): File {
     return File(this)
@@ -211,3 +223,9 @@ fun Any?.stringValue(nullReplace: String = ""): String {
         else -> return toString()
     }
 }
+
+val String.PERMISSION_GRANTED: Boolean
+get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_GRANTED
+
+val String.PERMISSION_DENIED: Boolean
+    get() = ContextCompat.checkSelfPermission(applicationContext, this) == PackageManager.PERMISSION_DENIED
