@@ -4,10 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonReport"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Report"/>
+    <Button
+        android:id="@+id/buttonExit"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Exit"/>
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"

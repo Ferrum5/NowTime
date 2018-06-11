@@ -31,12 +31,18 @@ class MainActivity : Activity(), Handler.Callback {
 
         textView = findViewById(R.id.textView)
 
-        findViewById<View>(R.id.button).setOnClickListener {
+        findViewById<View>(R.id.buttonReport).setOnClickListener {
             timerHandler.sendEmptyMessage(1)
+        }
+        findViewById<View>(R.id.buttonExit).setOnClickListener {
+            finish()
         }
         timerHandler.sendEmptyMessage(1)
     }
 
+    override fun onBackPressed() {
+
+    }
 
     override fun onDestroy() {
         super.onDestroy()
