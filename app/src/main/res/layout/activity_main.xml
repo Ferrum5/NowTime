@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
+        android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Start"
-        android:onClick="start"/>
-    <Button
+        android:text="Report"/>
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Shutdown"
-        android:onClick="stop"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"/>
 </LinearLayout>

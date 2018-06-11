@@ -1,14 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.alpacaplayground.nowtime">
 
-
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
-    <uses-permission android:name="android.permission.APPLICATION_OVERLAY_WINDOW"/>
-
     <application
 
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_app"
         android:label="整点报时">
         <activity-alias
             android:name="Entrance"
@@ -18,9 +13,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-        <activity android:name=".MainActivity" />
-        <service android:name=".NowTimeService"
-            android:process=":timer"/>
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
     </application>
 
 </manifest>
