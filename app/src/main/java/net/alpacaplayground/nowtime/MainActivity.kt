@@ -17,7 +17,7 @@ class MainActivity : Activity(){
         startService(Intent(this,NowTimeService::class.java))
     }
 
-    public fun Shutdown(view: View){
+    public fun stop(view: View){
         stopService(Intent(this,NowTimeService::class.java))
     }
 }
