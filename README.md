@@ -1,2 +1,2 @@
-# drotlin
-做android项目用到的kotlin工具集
+# NowTime整点报时
+整点和半点的自动报时

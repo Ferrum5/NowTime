@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="net.alpacaplayground.nowtime">
+
+    <application
+
+        android:icon="@mipmap/ic_launcher"
+        android:label="整点报时">
+        <activity-alias
+            android:name="Entrance"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity android:name=".MainActivity" />
+        <service android:name=".NowTimeService" />
+    </application>
+
+</manifest>
