@@ -113,9 +113,6 @@ class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback
 
 
                     // = (2 * 60 - second) * 1000
-
-                    //释放tts
-                    timerHandler.sendEmptyMessageDelayed(2, 10000)
                     //下次播报时间
                     calendar.timeInMillis = calendar.timeInMillis + (time2Next * 60 * 1000)
                     val nextReportMsg = "下次播报时间：${dateFormat.format(calendar.time)}\n还有${time2Next}分钟"
@@ -129,7 +126,7 @@ class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback
 //                    }
                     Log.i("TimeNow", nextReportMsg)
                     liveMsg.postValue(nextReportMsg)
-                    timerHandler.sendEmptyMessageDelayed(1, (60 - second) * 1000L)
+                    timerHandler.sendEmptyMessageDelayed(WhatTimeNow, (60 - second) * 1000L)
                 }
             }
             WhatReleaseTts -> {
