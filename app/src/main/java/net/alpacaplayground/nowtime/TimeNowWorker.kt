@@ -19,6 +19,10 @@ import java.util.*
 private const val WhatTimeNow = 1
 private const val WhatReleaseTts = 2
 private const val WhatTimeNowForce = 3
+private const val FlagReport0 = 0
+private const val FlagReport15 = 1
+private const val FlagReport30 = 2
+private const val FlagReport45 = 3
 
 class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback {
 
@@ -66,9 +70,9 @@ class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback
 
                     var speech = false
 
-                    val time2Next = if (speakFlag == 0) { //下次整点报时
-                        if (minute <= 30) { //改为半点
-                            speakFlag = speakFlag xor 1
+                    val time2Next = if (speakFlag == FlagReport0) { //整点报时
+                        if (minute < 30) { //改为半点
+                            speakFlag = FlagReport30
                             speech = true
                             30 - minute
                         } else {
@@ -76,7 +80,7 @@ class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback
                         }
                     } else { //下次半点报时
                         if (minute >= 30) { //改为整点报时
-                            speakFlag = speakFlag xor 1
+                            speakFlag = FlagReport0
                             speech = true
                             60 - minute
                         } else {
