@@ -3,6 +3,7 @@ package net.alpacaplayground.nowtime
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.arch.lifecycle.MutableLiveData
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -11,18 +12,21 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.speech.tts.TextToSpeech
-import android.support.v4.app.AlarmManagerCompat
 import android.util.Log
-import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.min
 
 private const val WhatTimeNow = 1
 private const val WhatReleaseTts = 2
 private const val WhatTimeNowForce = 3
 
-class TimeNowWorker(val context: Context) : Handler.Callback {
+class TimeNowWorker(val context: Context) : BroadcastReceiver(),Handler.Callback {
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        Log.i("TimeNow", "Receive time tick")
+        timerHandler.sendEmptyMessage(WhatTimeNow)
+    }
+
     private var speakFlag = 0
     private var tts: TextToSpeech? = null
     private var ttsPrepare = TextToSpeech.ERROR
@@ -90,6 +94,7 @@ class TimeNowWorker(val context: Context) : Handler.Callback {
                         } else {
                             speech(tts, "现在时间,${hour}点${if (minute < 10) "0" else ""}${minute}分")
                         }
+                        timerHandler.sendEmptyMessageDelayed(WhatReleaseTts,120000)
                     }
 //                    val nextDelay = ((if (minute <= 1) {
 //                        speech(tts, "现在时间,${hour}点整")

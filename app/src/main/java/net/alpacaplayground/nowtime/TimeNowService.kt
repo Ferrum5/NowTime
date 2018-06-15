@@ -4,6 +4,7 @@ import android.app.Service
 import android.arch.lifecycle.Observer
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
@@ -28,12 +29,12 @@ class TimeNowService : Service(), Observer<String> {
 
     val binder: IBinder = object : ICallTimerAidl.Stub() {
         override fun bindMain() {
-            Log.i("TImeNow","bindMain")
+            Log.i("TImeNow", "bindMain")
             bindService(Intent(this@TimeNowService, MainService::class.java), serviceConnection, BIND_AUTO_CREATE)
         }
 
         override fun unbindMain() {
-            Log.i("TImeNow","unbindMain")
+            Log.i("TImeNow", "unbindMain")
             unbindService(serviceConnection)
         }
 
@@ -44,6 +45,8 @@ class TimeNowService : Service(), Observer<String> {
     override fun onCreate() {
         super.onCreate()
         TimeNowWorker(this).apply { worker = this }.liveMsg.observeForever(this)
+        val intentFilter = IntentFilter(Intent.ACTION_TIME_TICK)
+        registerReceiver(worker, intentFilter)
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -52,6 +55,7 @@ class TimeNowService : Service(), Observer<String> {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(worker)
         worker.liveMsg.removeObserver(this)
         worker.onDestroy()
     }
