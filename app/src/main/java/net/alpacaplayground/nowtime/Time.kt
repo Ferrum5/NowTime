@@ -16,6 +16,8 @@ class Time {
 
     var second by CalendarDelegate(Calendar.SECOND)
 
+    val milliSecond by CalendarDelegate(Calendar.MILLISECOND)
+
     var timeInMillis: Long
         get() = calendar.timeInMillis
         set(value) {
@@ -23,15 +25,14 @@ class Time {
         }
 
     val nextHour: Int
-    get() = if(hour==23) 0 else hour
+    get() = if(hour==23) 0 else (hour+1)
 
     fun updateToNow() {
         timeInMillis = System.currentTimeMillis()
     }
 
-    fun format(pattern: String): String {
-        format.applyPattern(pattern)
-        return format.format(timeInMillis)
+    fun hourMinute(pattern: String): String{
+        return String.format(pattern, hour, minute)
     }
 
     private class CalendarDelegate(val field: Int) : ReadWriteProperty<Time,Int>{

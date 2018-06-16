@@ -21,7 +21,7 @@ private const val FlagReport15 = 1
 private const val FlagReport30 = 2
 private const val FlagReport45 = 3
 
-val liveMsg = MutableLiveData<Int>()
+val liveMsg = MutableLiveData<String>()
 val liveTtsStatus = MutableLiveData<String>()
 
 object TimeNowWorker : Handler.Callback {
@@ -66,6 +66,7 @@ object TimeNowWorker : Handler.Callback {
 
     override fun handleMessage(msg: Message): Boolean {
 
+        //释放tts
         if (msg.what == WhatTtsRelease) {
             liveTtsStatus.postValue(null)
             timerHandler.removeMessages(WhatTtsRelease)
@@ -77,63 +78,73 @@ object TimeNowWorker : Handler.Callback {
             return true
         }
 
+        timerHandler.removeMessages(WhatTimeNow)
+        timerHandler.removeMessages(WhatTimeNowForce)
+
         time.updateToNow()
+        val minute = time.minute
 
         var speech = WhatTimeNowForce == msg.what
 
-        val minute = time.minute
 
-        val time2NextMinute = when (minute) {
-            in 0..14 -> {
+        //判断是否播报
+        val nextReportMinute = when {
+            minute in 0..14 -> {
                 if (reportFlag != FlagReport15) {
                     reportFlag = FlagReport15
                     speech = true
                 }
-                15 - minute
+                15
             }
-            in 15..29 -> {
+            minute in 15..29 -> {
                 if (reportFlag != FlagReport30) {
                     reportFlag = FlagReport30
                     speech = true
                 }
-                30 - minute
+                30
             }
-            in 30..44 -> {
+            minute in 30..44 -> {
                 if (reportFlag != FlagReport45) {
                     reportFlag = FlagReport45
                     speech = true
                 }
-                45 - minute
+                45
             }
             else -> {
                 if (reportFlag != FlagReport0) {
                     reportFlag = FlagReport0
                     speech = true
                 }
-                60 - minute
+                60
             }
         }
 
-        //下次播报时间
-        log("距下次${time2NextMinute}分")
-        liveMsg.postValue(time2NextMinute)
 
+        liveMsg.postValue("""
+                |距下次播报时间
+                |${String.format("%02d:%02d",
+                if (nextReportMinute == 60) time.nextHour else time.hour,
+                if(nextReportMinute == 60) 0 else nextReportMinute)}
+                |还有${nextReportMinute - minute}分钟
+                """.trimMargin())
+
+        //报时
         if (speech) {
             if (minute <= 1) {
                 speech("现在时间,${time.hour}点整")
             } else if (minute >= 59) {
                 speech("现在时间,${time.nextHour}点整")
             } else {
-                speech("现在时间,${time.format("HH点mm分")}")
+                speech("现在时间,${time.hourMinute("%02d点%02d分")}")
             }
         }
 
-        if (!(timerHandler.hasMessages(WhatTimeNow) || timerHandler.hasMessages(WhatTimeNowForce))) {
-            time.updateToNow()
-            val messageDelaySecond = 60 - time.second
-            log("下一分钟消息延迟${messageDelaySecond}s")
-            timerHandler.sendEmptyMessageDelayed(WhatTimeNow, messageDelaySecond * 1000L)
-        }
+        //下次消息
+        time.updateToNow()
+        val messageDelaySecond = time.second.let { if (it >= 30) 60 - it else 30 - it }
+        log("下一分钟消息延迟${messageDelaySecond}s")
+        timerHandler.sendEmptyMessageDelayed(WhatTimeNow, messageDelaySecond * 1000L - time.milliSecond)
+
         return true
     }
 
