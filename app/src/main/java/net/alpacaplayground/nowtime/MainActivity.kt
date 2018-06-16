@@ -10,38 +10,54 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.TextView
 import java.text.SimpleDateFormat
 
-class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var textTime: TextView
-    private val dateFormat by lazy { SimpleDateFormat("HH:mm") }
+    private val time = Time()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        TimeNowWorker.context = this
+
         setContentView(R.layout.activity_main)
         textTime = findViewById(R.id.textTime)
+
         updateTime()
-        findViewById<View>(R.id.buttonReport).setOnClickListener { startService(Intent(this, MainService::class.java)) }
-        findViewById<View>(R.id.buttonExit).setOnClickListener {
-            stopService(Intent(this, MainService::class.java))
-            stopService(Intent(this, TimeNowService::class.java))
-            finish()
-        }
-        val textMessage: TextView = findViewById(R.id.textView)
+        //报时
+        val button: Button = findViewById(R.id.buttonReport)
+        button.setOnClickListener { TimeNowWorker.timeNow() }
+
+
+        //tts状态
+        liveTtsStatus.observe(this, Observer {
+            button.text = it ?: "REPORT"
+        })
+
+        val textMessage: TextView = findViewById(R.id.textNext)
+
         liveMsg.observe(this, Observer {
-            textMessage.text = it
+            textMessage.text = """
+                |距下次播报时间
+                |${(time + ((it ?: 0) * 60 * 1000)).format("HH:mm")}
+                |还有${it}分钟
+                """.trimMargin()
             updateTime()
         })
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_ALARM) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.SET_ALARM), 1)
-        }
+    }
+
+    override fun onBackPressed() {
+        TimeNowWorker.timeNow()
     }
 
 
     private fun updateTime() {
-        textTime.text = dateFormat.format(System.currentTimeMillis())
+        time.updateToNow()
+        textTime.text = time.format("HH:mm")
     }
 
     override fun onStart() {
@@ -52,11 +68,5 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
     override fun onStop() {
         super.onStop()
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService(Intent(this, MainService::class.java))
     }
 }

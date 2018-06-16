@@ -2,7 +2,7 @@
     package="net.alpacaplayground.nowtime">
 
     <application
-        android:theme="@style/Theme.AppCompat.Light"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:icon="@mipmap/icon_app"
         android:label="整点报时">
         <activity-alias
@@ -17,9 +17,6 @@
             android:name=".MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
-        <service android:name=".TimeNowService"
-            android:process=":timer"/>
-        <service android:name=".MainService"/>
     </application>
 
 </manifest>
