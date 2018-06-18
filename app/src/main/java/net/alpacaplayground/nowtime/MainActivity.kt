@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         seekBegin.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 NowTime.beginTime = progress
-                textBegin.text = "开始时间${progress}点"
+                textBegin.text = "开始时间：${progress}点"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         seekEnd.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 NowTime.endTime = progress
-                textEnd.text = "开始时间${progress}点"
+                textEnd.text = "结束时间：${progress}点"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
