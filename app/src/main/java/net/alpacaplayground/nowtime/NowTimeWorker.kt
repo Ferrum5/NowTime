@@ -163,10 +163,13 @@ object TimeNowWorker : Handler.Callback {
 
         //下次消息
         time.updateToNow()
-        val messageDelaySecond = time.second.let { if (it >= 30) 60 - it else 30 - it }
-        log("下一分钟消息延迟${messageDelaySecond}s")
-        timerHandler.sendEmptyMessageDelayed(WhatTimeNow, messageDelaySecond * 1000L - time.milliSecond)
-
+        if(time.minute!=minute){
+            timerHandler.sendEmptyMessage(WhatTimeNow)
+        }else{
+            val messageDelaySecond = time.second.let { if (it >= 30) 60 - it else 30 - it }
+            log("下一分钟消息延迟${messageDelaySecond}s")
+            timerHandler.sendEmptyMessageDelayed(WhatTimeNow, messageDelaySecond * 1000L - time.milliSecond)
+        }
         return true
     }
 
