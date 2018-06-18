@@ -1,24 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+
     <TextView
         android:id="@+id/textTime"
-        android:text="00:00"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:textSize="100sp"
-        android:layout_marginTop="20dp"/>
+        android:text="00:00"
+        android:textSize="100sp" />
+
     <Button
         android:id="@+id/buttonReport"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Report"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"/>
+        android:text="Report" />
+
+    <Switch
+        android:id="@+id/reportType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:checked="false"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textTimeBegin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
+
+    <SeekBar
+        android:id="@+id/seekTimeBegin"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginTop="5dp"
+        />
+
+    <TextView
+        android:id="@+id/textTimeEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
+
+    <SeekBar
+        android:id="@+id/seekTimeEnd"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginTop="5dp"
+        />
 
     <TextView
         android:id="@+id/textNext"

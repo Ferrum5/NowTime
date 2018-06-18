@@ -84,33 +84,51 @@ object TimeNowWorker : Handler.Callback {
         time.updateToNow()
         val minute = time.minute
 
-        var speech = WhatTimeNowForce == msg.what
+
+        val forceSpeech = WhatTimeNowForce == msg.what
+        var speech = forceSpeech
 
 
         //判断是否播报
-        val nextReportMinute = when {
-            minute in 0..14 -> {
-                if (reportFlag != FlagReport15) {
-                    reportFlag = FlagReport15
-                    speech = true
+        val nextReportMinute = if (NowTime.reportType == NowTime.ReportTypeEvery15) {//每15分钟报时
+            when {
+                minute in 0..14 -> {
+                    if (reportFlag != FlagReport15) {
+                        reportFlag = FlagReport15
+                        speech = true
+                    }
+                    15
                 }
-                15
+                minute in 15..29 -> {
+                    if (reportFlag != FlagReport30) {
+                        reportFlag = FlagReport30
+                        speech = true
+                    }
+                    30
+                }
+                minute in 30..44 -> {
+                    if (reportFlag != FlagReport45) {
+                        reportFlag = FlagReport45
+                        speech = true
+                    }
+                    45
+                }
+                else -> {
+                    if (reportFlag != FlagReport0) {
+                        reportFlag = FlagReport0
+                        speech = true
+                    }
+                    60
+                }
             }
-            minute in 15..29 -> {
+        } else {
+            if (minute < 30) {
                 if (reportFlag != FlagReport30) {
                     reportFlag = FlagReport30
                     speech = true
                 }
                 30
-            }
-            minute in 30..44 -> {
-                if (reportFlag != FlagReport45) {
-                    reportFlag = FlagReport45
-                    speech = true
-                }
-                45
-            }
-            else -> {
+            } else {
                 if (reportFlag != FlagReport0) {
                     reportFlag = FlagReport0
                     speech = true
@@ -124,9 +142,13 @@ object TimeNowWorker : Handler.Callback {
                 |距下次播报时间
                 |${String.format("%02d:%02d",
                 if (nextReportMinute == 60) time.nextHour else time.hour,
-                if(nextReportMinute == 60) 0 else nextReportMinute)}
+                if (nextReportMinute == 60) 0 else nextReportMinute)}
                 |还有${nextReportMinute - minute}分钟
                 """.trimMargin())
+
+        if (speech) {
+            speech = forceSpeech || checkSpeechTime(if (minute >= 59) time.nextHour else time.hour, NowTime.beginTime, NowTime.endTime)
+        }
 
         //报时
         if (speech) {
@@ -146,6 +168,12 @@ object TimeNowWorker : Handler.Callback {
         timerHandler.sendEmptyMessageDelayed(WhatTimeNow, messageDelaySecond * 1000L - time.milliSecond)
 
         return true
+    }
+
+    fun checkSpeechTime(hour: Int, beginTime: Int, endTime: Int) = when {
+        beginTime == endTime -> true
+        beginTime < endTime -> hour in beginTime..endTime
+        else -> hour <= beginTime || hour >= endTime
     }
 
     fun timeNow() {
